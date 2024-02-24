@@ -1,0 +1,79 @@
+import java.util.Scanner;
+import java.util.Timer;
+import java.util.TimerTask;
+
+public class QuizApplication {
+
+    private static final int QUIZ_TIME_SECONDS = 30;
+    private static int score = 0;
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        Timer timer = new Timer();
+
+        System.out.println("Welcome to the Quiz Application!");
+        System.out.println("You will have " + QUIZ_TIME_SECONDS + " seconds to answer each question.");
+
+        for (int questionNumber = 1; questionNumber <= 3; questionNumber++) {
+            System.out.println("\nQuestion " + questionNumber + ":");
+            askQuestion(questionNumber, scanner, timer);
+        }
+
+        System.out.println("\nQuiz completed! Your final score is: " + score);
+        scanner.close();
+        timer.cancel();
+    }
+
+    private static void askQuestion(int questionNumber, Scanner scanner, Timer timer) {
+        String question;
+        String correctAnswer;
+
+        switch (questionNumber) {
+            case 1:
+                question = "What is the capital of France?";
+                correctAnswer = "Paris";
+                break;
+            case 2:
+                question = "Which planet is known as the Red Planet?";
+                correctAnswer = "Mars";
+                break;
+            case 3:
+                question = "What is the largest mammal on Earth?";
+                correctAnswer = "Blue Whale";
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid question number");
+        }
+
+        System.out.println(question);
+
+        QuizTimerTask quizTimerTask = new QuizTimerTask(scanner);
+        timer.schedule(quizTimerTask, QUIZ_TIME_SECONDS * 1000);
+
+        System.out.print("Your answer: ");
+        String userAnswer = scanner.nextLine().trim().toLowerCase();
+
+        if (userAnswer.equals(correctAnswer.toLowerCase())) {
+            System.out.println("Correct! You earned a point.");
+            score++;
+        } else {
+            System.out.println("Incorrect. The correct answer is: " + correctAnswer);
+        }
+
+        timer.purge(); // Remove cancelled tasks from the timer's task queue
+    }
+
+    private static class QuizTimerTask extends TimerTask {
+        private final Scanner scanner;
+
+        public QuizTimerTask(Scanner scanner) {
+            this.scanner = scanner;
+        }
+
+        @Override
+        public void run() {
+            System.out.println("\nTime's up! You did not answer in time.");
+            scanner.nextLine(); // Consume the remaining newline character
+            cancel(); // Cancel the timer task
+        }
+    }
